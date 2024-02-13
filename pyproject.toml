@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "autosum"
+version = "0.1.0"
+description = "Summarize documents from you CLI"
+authors = ["Jiri Podivin <jpodivin@redhat.com>"]
+license = "Apache 2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+transformers = "^4.37.2"
+torch = "^2.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+summarize = "autosum.summarize:main"
+

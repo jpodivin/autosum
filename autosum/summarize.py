@@ -6,6 +6,7 @@ import os
 import logging
 import textwrap
 import sys
+import pypdf
 
 LOGGER = logging.getLogger("default")
 
@@ -48,15 +49,28 @@ def main():
 
     args = parser.parse_args()
 
+    document = ""
+
     if args.verbose:
         LOGGER.setLevel(logging.DEBUG)
     summarizer = pipeline('summarization', model=args.model)
-    if not args.document:
-        document = '\n'.join(sys.stdin.readlines())
-    else:
-        with open(args.document, 'r', encoding='utf-8') as f:
-            document = f.read()
+    try:
+        if not args.document:
+            document = '\n'.join(sys.stdin.readlines())
+        else:
+            if args.document.endswith('.pdf'):
+                reader = pypdf.PdfReader(args.document)
+                for page in reader.pages:
+                    document += f"\n {page.extract_text()}"
+            else:
+                with open(args.document, 'r', encoding='utf-8') as f:
+                    document = f.read()
+    except UnicodeDecodeError:
+        LOGGER.error("Document decoding failed. Check your encoding!", exc_info=True)
+        exit(1)
+
     doc_lines = document.split('\n')
+
     LOGGER.info(f"Original -> lines: {len(doc_lines)} words: {len(document.split(' '))} chars {len(document)}")
 
     summary = summarize_text(summarizer, document, max_summary_size=args.max_size)
